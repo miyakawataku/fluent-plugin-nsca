@@ -5,6 +5,11 @@ module Fluent
   class NscaOutput < Fluent::BufferedOutput
     Fluent::Plugin.register_output('nsca', self)
 
+    # These max bytes are specified in the pack string in send_nsca library
+    MAX_HOST_NAME_BYTES = 64
+    MAX_SERVICE_DESCRIPTION_BYTES = 128
+    MAX_PLUGIN_OUTPUT_BYTES = 512
+
     # The IP address or the hostname of the host running the NSCA daemon.
     config_param :server, :string, :default => 'localhost'
 
@@ -48,21 +53,41 @@ module Fluent
       require 'send_nsca'
     end
 
-    MAX_HOST_NAME_BYTES = 64
-
     public
     def configure(conf)
       super
       @host_name ||= Socket.gethostname
-      warn_if_host_name_exceeds_max(@host_name)
+      warn_if_host_name_exceeds_max_bytes(@host_name)
+      warn_if_service_description_exceeds_max_bytes(@service_description)
+      warn_if_plugin_output_exceeds_max_bytes(@plugin_output)
     end
 
     private
-    def warn_if_host_name_exceeds_max(host_name)
+    def warn_if_host_name_exceeds_max_bytes(host_name)
       if host_name.bytesize > MAX_HOST_NAME_BYTES
         log.warn("Host name exceeds the max bytes; it will be truncated",
                  :max_host_name_bytes => MAX_HOST_NAME_BYTES,
                  :host_name => host_name)
+      end
+    end
+
+    private
+    def warn_if_service_description_exceeds_max_bytes(service_description)
+      if service_description and
+        service_description.bytesize > MAX_SERVICE_DESCRIPTION_BYTES
+        log.warn(
+          "Service description exceeds the max bytes; it will be truncated",
+          :max_service_description_bytes => MAX_SERVICE_DESCRIPTION_BYTES,
+          :service_description => service_description)
+      end
+    end
+
+    private
+    def warn_if_plugin_output_exceeds_max_bytes(plugin_output)
+      if plugin_output and plugin_output.bytesize > MAX_PLUGIN_OUTPUT_BYTES
+        log.warn("Plugin output exceeds the max bytes; it will be truncated",
+                :max_plugin_output_bytes => MAX_PLUGIN_OUTPUT_BYTES,
+                :plugin_output => plugin_output)
       end
     end
 
@@ -95,7 +120,7 @@ module Fluent
     def determine_host_name(record)
       if @host_name_field and record[@host_name_field]
         host_name = record[@host_name_field].to_s
-        warn_if_host_name_exceeds_max(host_name)
+        warn_if_host_name_exceeds_max_bytes(host_name)
         return host_name
       else
         return @host_name
@@ -105,10 +130,13 @@ module Fluent
     private
     def determine_service_description(tag, record)
       if @service_description_field and record[@service_description_field]
-        return record[@service_description_field]
+        service_description = record[@service_description_field]
+        warn_if_service_description_exceeds_max_bytes(service_description)
+        return service_description
       elsif @service_description
         return @service_description
       else
+        warn_if_service_description_exceeds_max_bytes(tag)
         return tag
       end
     end
@@ -131,11 +159,15 @@ module Fluent
     private
     def determine_plugin_output(record)
       if @plugin_output_field and record[@plugin_output_field]
-        return record[@plugin_output_field]
+        plugin_output = record[@plugin_output_field]
+        warn_if_plugin_output_exceeds_max_bytes(plugin_output)
+        return plugin_output
       elsif @plugin_output
         return @plugin_output
       else
-        return record.to_json
+        plugin_output = record.to_json
+        warn_if_plugin_output_exceeds_max_bytes(plugin_output)
+        return plugin_output
       end
     end
   end

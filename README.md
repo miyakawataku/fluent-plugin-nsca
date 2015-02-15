@@ -108,9 +108,7 @@ The service description is determined as below.
 
 1. The tag name (lowest priority)
 2. `service_description` option
-  * The static service description string.
-3. `service_description_field` (highest priority)
-  * The name of the field which contains the service description.
+3. The field specified by `service_description_field` option (highest priority)
 
 For example,
 let the configuration file contain the section below:
@@ -118,9 +116,7 @@ let the configuration file contain the section below:
 ```apache
 <match ddos>
   type nsca
-
   ...snip...
-
   service_description_field monitee_service
 </match>
 ```
@@ -135,6 +131,9 @@ When the record
 `{"num" => 42}` is input to the tag `ddos`,
 the plugin sends a service check with the service description
 "ddos" (the tag name).
+
+Be aware that if the service description exceeds 128 bytes,
+it will be truncated.
 
 #### Return code
 
@@ -199,6 +198,9 @@ the plugin sends a service check with the plugin output "DDOS detected".
 When the record
 `{"num" => 42}` is input to the tag `ddos`,
 the plugin sends a service check with the plugin output '{"num":42}'.
+
+Be aware that if the plugin output exceeds 512 bytes,
+it will be truncated.
 
 ## Installation (doesn't work yet!)
 
