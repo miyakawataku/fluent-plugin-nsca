@@ -33,7 +33,7 @@ module Fluent
       if not @@valid_return_codes.has_key?(return_code)
           raise Fluent::ConfigError,
             "invalid 'return_code': #{return_code}; 'return_code' must be" +
-            "0, 1, 2, 3, OK, WARNING, CRITICAL, or UNKNOWN"
+            " 0, 1, 2, 3, OK, WARNING, CRITICAL, or UNKNOWN"
       end
       @@valid_return_codes[return_code]
     }
@@ -79,7 +79,7 @@ module Fluent
       if service_description and
         service_description.bytesize > MAX_SERVICE_DESCRIPTION_BYTES
         log.warn(
-          "Service description exceeds the max bytes; it will be truncated",
+          "Service description exceeds the max bytes; it will be truncated.",
           :max_service_description_bytes => MAX_SERVICE_DESCRIPTION_BYTES,
           :service_description => service_description)
       end
@@ -88,7 +88,7 @@ module Fluent
     private
     def warn_if_plugin_output_exceeds_max_bytes(plugin_output)
       if plugin_output and plugin_output.bytesize > MAX_PLUGIN_OUTPUT_BYTES
-        log.warn("Plugin output exceeds the max bytes; it will be truncated",
+        log.warn("Plugin output exceeds the max bytes; it will be truncated.",
                 :max_plugin_output_bytes => MAX_PLUGIN_OUTPUT_BYTES,
                 :plugin_output => plugin_output)
       end
@@ -151,7 +151,7 @@ module Fluent
         if return_code
           return return_code
         end
-        log.warn('Invalid return code',
+        log.warn('Invalid return code.',
                  :return_code_field => @return_code_field,
                  :value => record[@return_code_field],
                  :fall_back_to => @return_code)
