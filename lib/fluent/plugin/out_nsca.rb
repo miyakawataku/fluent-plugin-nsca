@@ -14,10 +14,14 @@ module Fluent
     # The password for authentication and encryption.
     config_param :password, :string, :default => ''
 
+    # Host name options: default=`hostname`.chomp
     config_param :host_name, :string, :default => nil
     config_param :host_name_field, :string, :default => nil
 
+    # Service description options: default=tag
     config_param :service_description, :string, :default => nil
+    config_param :service_description_field, :string, :default => nil
+
     config_param :return_code, :string, :default => nil
     config_param :plugin_output, :string, :default => nil
 
@@ -42,7 +46,7 @@ module Fluent
           :port => @port,
           :password => @password,
           :hostname => determine_host_name(record),
-          :service => @service_description,
+          :service => determine_service_description(tag, record),
           :return_code => @return_code.to_i,
           :status => @plugin_output
         })
@@ -59,6 +63,17 @@ module Fluent
         return record[@host_name_field].to_s
       else
         return @host_name
+      end
+    end
+
+    private
+    def determine_service_description(tag, record)
+      if @service_description_field and record[@service_description_field]
+        return record[@service_description_field]
+      elsif @service_description
+        return @service_description
+      else
+        return tag
       end
     end
   end

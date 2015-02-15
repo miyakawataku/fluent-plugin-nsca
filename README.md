@@ -96,10 +96,37 @@ The service description can be specified by one of the followin options.
 If none of them is specified,
 the plugin uses the tag as the service description.
 
-* `service_description`
+The service description is determined as below.
+
+1. The tag name (lowest priority)
+2. `service_description` option
   * The static service description string.
-* `service_description_field`
+3. `service_description_field` (highest priority)
   * The name of the field which contains the service description.
+
+For example,
+the configuration file contain the lines below:
+
+```apache
+<match ddos>
+  type nsca
+
+  ...snip...
+
+  service_description_field monitee_service
+</match>
+```
+
+When the record
+`{"num" => 42, "monitee_service" => "ddos_detection"}`
+is input to the tag `ddos`,
+the plugin sends a service check with the service description
+"ddos\_detection".
+
+When the record
+`{"num" => 42}` is input to the tag `ddos`,
+the plugin sends a service check with the service description
+"ddos" (the tag name).
 
 #### Return code
 

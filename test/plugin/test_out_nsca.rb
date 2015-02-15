@@ -119,4 +119,57 @@ class NscaOutputTest < Test::Unit::TestCase
     ]
     assert_equal [expected_first, expected_second], output
   end
+
+  # Sends a service check with service_description and service_description_field
+  def test_write_check_with_service_description_and_service_description_field
+    config = %[
+      #{CONFIG}
+      service_description ddos_detection
+      service_description_field service
+
+      host_name web.example.org
+      return_code 2
+      plugin_output possible attacks
+    ]
+    driver = create_driver(config, 'ddos')
+    time = Time.parse('2015-01-03 12:34:56 UTC').to_i
+    driver.emit({"name" => "Stephen", "service" => "possible_ddos"})
+    driver.emit({"name" => "Aggi"})
+    output = driver.run
+    expected_first = [
+      'monitor.example.com', 4242, 'aoxomoxoa',
+      'web.example.org', 'possible_ddos', 2, 'possible attacks'
+    ]
+    expected_second = [
+      'monitor.example.com', 4242, 'aoxomoxoa',
+      'web.example.org', 'ddos_detection', 2, 'possible attacks'
+    ]
+    assert_equal [expected_first, expected_second], output
+  end
+
+  # Sends a service check with service_description_field
+  def test_write_check_with_and_service_description_field
+    config = %[
+      #{CONFIG}
+      service_description_field service
+
+      host_name web.example.org
+      return_code 2
+      plugin_output possible attacks
+    ]
+    driver = create_driver(config, 'ddos')
+    time = Time.parse('2015-01-03 12:34:56 UTC').to_i
+    driver.emit({"name" => "Stephen", "service" => "possible_ddos"})
+    driver.emit({"name" => "Aggi"})
+    output = driver.run
+    expected_first = [
+      'monitor.example.com', 4242, 'aoxomoxoa',
+      'web.example.org', 'possible_ddos', 2, 'possible attacks'
+    ]
+    expected_second = [
+      'monitor.example.com', 4242, 'aoxomoxoa',
+      'web.example.org', 'ddos', 2, 'possible attacks'
+    ]
+    assert_equal [expected_first, expected_second], output
+  end
 end
