@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["miyakawa.taku@gmail.com"]
   spec.description   = %q{Fluentd output plugin to send service checks to a Nagios NSCA daemon}
   spec.summary       = %q{Fluentd output plugin to send service checks to a Nagios NSCA daemon}
-  spec.homepage      = ""
-  spec.license       = "MIT"
+  spec.homepage      = "https://github.com/miyakawataku/fluent-plugin-nsca/"
+  spec.license       = "Apache License, v2.0"
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
