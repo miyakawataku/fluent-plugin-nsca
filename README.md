@@ -225,11 +225,8 @@ For example:
 
 ## Installation
 
-If you are using td-agent, execute the command below.
-
-    $ sudo /usr/lib64/fluent/ruby/bin/fluent-gem fluent-plugin-nsca
-
-Then add `match` section to your configuration file.
+1. Install fluent-plugin-nsca gem from rubygems.org.
+2. Add `match` sections to your fluentd configuration file.
 
 ## Contributing
 
