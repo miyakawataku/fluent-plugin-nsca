@@ -14,7 +14,7 @@ module Fluent
     # The password for authentication and encryption.
     config_param :password, :string, :default => ''
 
-    # Host name options: default=`hostname`.chomp
+    # Host name options: default = the host name of the fluentd server
     config_param :host_name, :string, :default => nil
     config_param :host_name_field, :string, :default => nil
 
@@ -49,7 +49,7 @@ module Fluent
 
     def configure(conf)
       super
-      @host_name ||= `hostname`.chomp
+      @host_name ||= Socket.gethostname
     end
 
     def format(tag, time, record)

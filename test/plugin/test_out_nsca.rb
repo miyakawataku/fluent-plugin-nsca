@@ -2,11 +2,10 @@
 # vim: et sw=2 sts=2
 
 require 'helper'
+require 'socket'
 require 'send_nsca'
 
 class NscaOutputTest < Test::Unit::TestCase
-  include RR::Adapters::TestUnit
-
   def setup
     Fluent::Test.setup
     stub.proxy(SendNsca::NscaConnection).new { |obj|
@@ -129,7 +128,7 @@ class NscaOutputTest < Test::Unit::TestCase
       'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
     ]
     expected_second = [
-      'monitor.example.com', 4242, 'aoxomoxoa', `hostname`.chomp, 'ddos_monitor', 2, 'possible attacks'
+      'monitor.example.com', 4242, 'aoxomoxoa', Socket.gethostname, 'ddos_monitor', 2, 'possible attacks'
     ]
     assert_equal [expected_first, expected_second], output
   end

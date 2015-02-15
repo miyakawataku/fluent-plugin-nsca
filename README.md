@@ -76,11 +76,9 @@ with the return code and the plugin output.
 
 The host name is determined as below.
 
-1. The result of `hostname` command (lowest priority)
+1. The host name of the fluentd server (lowest priority)
 2. `host_name` option
-  * The static host name string.
-3. `host_name_field` option (highest priority)
-  * The name of the field which contains the host name.
+3. The field specified by `host_name_field` option (highest priority)
 
 For example,
 let the fluentd server have the host name "fluent",
@@ -89,9 +87,7 @@ and the configuration file contain the section below:
 ```apache
 <match ddos>
   type nsca
-
   ...snip...
-
   host_name_field monitee
 </match>
 ```
