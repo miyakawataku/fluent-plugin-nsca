@@ -20,7 +20,7 @@ class NscaOutputTest < Test::Unit::TestCase
 
   CONFIG = %[
     server monitor.example.com
-    port 5667
+    port 4242
     password aoxomoxoa
   ]
 
@@ -30,12 +30,7 @@ class NscaOutputTest < Test::Unit::TestCase
 
   # Connection settings are read
   def test_connection_settings
-    config = %[
-      server monitor.example.com
-      port 4242
-      password aoxomoxoa
-    ]
-    driver = create_driver(config)
+    driver = create_driver(CONFIG)
     assert_equal 'monitor.example.com', driver.instance.instance_eval{ @server }
     assert_equal 4242, driver.instance.instance_eval{ @port }
     assert_equal 'aoxomoxoa', driver.instance.instance_eval{ @password }
@@ -60,11 +55,10 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.run
   end
 
+  # Sends a service check with constant values
   def test_write_constant_values
     config = %[
-      server monitor.example.com
-      port 4242
-      password aoxomoxoa
+      #{CONFIG}
       host_name web.example.org
       service_description ddos_monitor
       return_code 2
@@ -75,5 +69,54 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen"}, time)
     output = driver.run
     assert_equal [['monitor.example.com', 4242, 'aoxomoxoa', 'web.example.org', 'ddos_monitor', 2, 'possible attacks']], output
+  end
+
+  # Sends a service check with host_name and host_name_field
+  def test_write_check_with_host_name_and_host_name_field
+    config = %[
+      #{CONFIG}
+      host_name_field host
+      host_name fallback.example.org
+
+      service_description ddos_monitor
+      return_code 2
+      plugin_output possible attacks
+    ]
+    driver = create_driver(config, 'ddos')
+    time = Time.parse('2015-01-03 12:34:56 UTC').to_i
+    driver.emit({"name" => "Stephen", "host" => "app.example.org"}, time)
+    driver.emit({"name" => "Aggi"}, time)
+    output = driver.run
+    expected_first = [
+      'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
+    ]
+    expected_second = [
+      'monitor.example.com', 4242, 'aoxomoxoa', 'fallback.example.org', 'ddos_monitor', 2, 'possible attacks'
+    ]
+    assert_equal [expected_first, expected_second], output
+  end
+
+  # Sends a service check with host_name_field
+  def test_write_check_with_host_name_field
+    config = %[
+      #{CONFIG}
+      host_name_field host
+
+      service_description ddos_monitor
+      return_code 2
+      plugin_output possible attacks
+    ]
+    driver = create_driver(config, 'ddos')
+    time = Time.parse('2015-01-03 12:34:56 UTC').to_i
+    driver.emit({"name" => "Stephen", "host" => "app.example.org"}, time)
+    driver.emit({"name" => "Aggi"}, time)
+    output = driver.run
+    expected_first = [
+      'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
+    ]
+    expected_second = [
+      'monitor.example.com', 4242, 'aoxomoxoa', `hostname`.chomp, 'ddos_monitor', 2, 'possible attacks'
+    ]
+    assert_equal [expected_first, expected_second], output
   end
 end

@@ -66,14 +66,20 @@ with the return code and the plugin output.
 
 #### Host name
 
-The host name can be specified by one of the following options.
-If none of them is specified,
-the plugin uses the output of `hostname` command as the host name.
+The host name is determined as below.
 
-* `host_name`
+1. The result of `hostname` command (lowest priority)
+2. `host_name` option
   * The static host name string.
-* `host_name_field`
+3. `host_name_field` option (highest priority)
   * The name of the field which contains the host name.
+
+`host_name_field` option has the highes priority.
+For example, the configuration contains the line `host_name_field host`
+and the record contains `host` field whose value is `app.example.org`,
+`app.example.org` is send as the host name.
+If the record does not have the field specified by `host_name_field` option,
+the plugin falls back to `host_name` option or the result of `hostname` command.
 
 #### Service description
 

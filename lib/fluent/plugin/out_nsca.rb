@@ -15,6 +15,8 @@ module Fluent
     config_param :password, :string, :default => ''
 
     config_param :host_name, :string, :default => nil
+    config_param :host_name_field, :string, :default => nil
+
     config_param :service_description, :string, :default => nil
     config_param :return_code, :string, :default => nil
     config_param :plugin_output, :string, :default => nil
@@ -25,6 +27,7 @@ module Fluent
 
     def configure(conf)
       super
+      @host_name ||= `hostname`.chomp
     end
 
     def format(tag, time, record)
@@ -38,7 +41,7 @@ module Fluent
           :nscahost => @server,
           :port => @port,
           :password => @password,
-          :hostname => @host_name,
+          :hostname => determine_host_name(record),
           :service => @service_description,
           :return_code => @return_code.to_i,
           :status => @plugin_output
@@ -48,6 +51,15 @@ module Fluent
 
       # Returns the results of send_nsca for tests
       return results
+    end
+
+    private
+    def determine_host_name(record)
+      if @host_name_field and record[@host_name_field]
+        return record[@host_name_field].to_s
+      else
+        return @host_name
+      end
     end
   end
 end
