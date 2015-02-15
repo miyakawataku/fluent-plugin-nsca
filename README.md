@@ -200,16 +200,16 @@ the plugin sends a service check with the plugin output '{"num":42}'.
 Be aware that if the plugin output exceeds 512 bytes,
 it will be truncated.
 
-### Buffering option
+### Buffering
 
 The default value of `flush_interval` option is set to 1 second.
 It means that checks are sent for every 1 second.
 
 Except for `flush_interval`,
-the plugin uses default buffering options
-for buffered output plugins (defined in Fluent::BufferedOutput class),
+the plugin uses default options
+for buffered output plugins (defined in Fluent::BufferedOutput class).
 
-You can override the buffering options in the configuration.
+You can override buffering options in the configuration.
 For example:
 
 ```apache
