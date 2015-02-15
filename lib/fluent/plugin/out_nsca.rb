@@ -38,7 +38,9 @@ module Fluent
       'OK' => 0, 'WARNING' => 1, 'CRITICAL' => 2, 'UNKNOWN' => 3
     }
 
+    # Plugin output options: default = JSON notation of the record
     config_param :plugin_output, :string, :default => nil
+    config_param :plugin_output_field, :string, :default => nil
 
 
     def initialize
@@ -64,7 +66,7 @@ module Fluent
           :hostname => determine_host_name(record),
           :service => determine_service_description(tag, record),
           :return_code => determine_return_code(record),
-          :status => @plugin_output
+          :status => determine_plugin_output(record)
         })
         results.push(nsca_check.send_nsca)
       }
@@ -103,6 +105,17 @@ module Fluent
         log.warn('Invalid return code', :return_code_field => @return_code_field, :value => record[@return_code_field])
       end
       return @return_code
+    end
+
+    private
+    def determine_plugin_output(record)
+      if @plugin_output_field and record[@plugin_output_field]
+        return record[@plugin_output_field]
+      elsif @plugin_output
+        return @plugin_output
+      else
+        return record.to_json
+      end
     end
   end
 end

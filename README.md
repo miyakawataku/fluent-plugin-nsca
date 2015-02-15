@@ -142,11 +142,7 @@ the plugin sends a service check with the service description
 
 The return code is determined as below.
 
-The return code can be specified by one of the following options.
-If none of them is specified,
-the plugin uses 3 (UNKNOWN) as the return code.
-
-1. 3 or UNKNOWN (lowes priority)
+1. 3 or UNKNOWN (lowest priority)
 2. `return_code` option
   * The static return code.
   * The permitted values are `0`, `1`, `2`, `3`,
@@ -181,14 +177,30 @@ the plugin sends a service check with the default return code `3`.
 
 #### Plugin output
 
-The plugin output can be specified by one of the following options.
-If none of them is specified,
-the plugin uses the JSON notation of the record as the plugin output.
+The plugin output is determined as below.
 
-* `plugin_output`
-  * The static plugin output.
-* `plugin_output_field`
-  * The name of the field which contains the plugin output.
+1. JSON notation of the record (lowest priority)
+2. `plugin_output` option
+3. The field specified by `plugin_output_field` option (highest priority)
+
+For example,
+let the configuration file contain the section below:
+
+```apache
+<match ddos>
+  type nsca
+  ...snip...
+  plugin_output_field status
+</match>
+```
+
+When the record
+`{"num" => 42, "status" => "DDOS detected"}` is input to the tag `ddos`,
+the plugin sends a service check with the plugin output "DDOS detected".
+
+When the record
+`{"num" => 42}` is input to the tag `ddos`,
+the plugin sends a service check with the plugin output '{"num":42}'.
 
 ## Installation (doesn't work yet!)
 
