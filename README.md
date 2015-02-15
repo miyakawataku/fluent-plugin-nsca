@@ -1,7 +1,7 @@
 # fluent-plugin-nsca
 
-[Fluentd](http://fluentd.org) output plugin to send service checks
-to an [NSCA](http://exchange.nagios.org/directory/Addons/Passive-Checks/NSCA--2D-Nagios-Service-Check-Acceptor/details)
+[Fluentd](http://fluentd.org) output plugin to send service checks to an
+[NSCA](http://exchange.nagios.org/directory/Addons/Passive-Checks/NSCA--2D-Nagios-Service-Check-Acceptor/details)
 / [Nagios](http://www.nagios.org/) monitoring server.
 
 The plugin sends a service check to the NSCA server for each record.
@@ -30,10 +30,16 @@ The plugin sends a service check to the NSCA server for each record.
   ## The return code is read from the field "severity"
   return_code_field severity
 
-  ## The plugin output is not specified; hence the JSON notation of the record is used
+  ## The plugin output is not specified;
+  ## hence the plugin sends the JSON notation of the record.
 
 </match>
 ```
+
+### Plugin type
+
+The type of this plugin is `nsca`.
+So specify `type nsca` in `match` sections.
 
 ### Connection
 
@@ -51,10 +57,12 @@ comprises the following four fields.
 
 * Host name
   * Name of the monitored host.
-  * The corresponding property in the Nagios configuration is `host_name` property in a `host` definition.
+  * The corresponding property in the Nagios configuration is
+    `host_name` property in a `host` definition.
 * Service description
   * Name of the monitored service.
-  * The corresponding property in the Nagios configuration is `service_description` in a `service` definition.
+  * The corresponding property in the Nagios configuration is
+    `service_description` property in a `service` definition.
 * Return code
   * The severity of the service status.
   * 0 (OK), 1 (WARNING), 2 (CRITICAL) or 3 (UNKNOWN).
@@ -76,25 +84,27 @@ The host name is determined as below.
 
 For example,
 let the fluentd server have the host name "fluent",
-and the configuration file contain the below line:
+and the configuration file contain the section below:
 
 ```apache
-host_name_field monitee
+<match ddos>
+  type nsca
+
+  ...snip...
+
+  host_name_field monitee
+</match>
 ```
 
 When the record `{"num" => 42, "monitee" => "web.example.org"}`
-is input with the setting above,
+is input to the tag `ddos`,
 the plugin sends a service check with the host name "web.example.org".
 
-When the record `{"num" => 42}` is input with the setting above,
+When the record `{"num" => 42}` is input to the tag `ddos`,
 the plugin sends a service check with the host name "fluent"
 (the host name of the fluentd server).
 
 #### Service description
-
-The service description can be specified by one of the followin options.
-If none of them is specified,
-the plugin uses the tag as the service description.
 
 The service description is determined as below.
 
@@ -105,7 +115,7 @@ The service description is determined as below.
   * The name of the field which contains the service description.
 
 For example,
-the configuration file contain the lines below:
+the configuration file contain the section below:
 
 ```apache
 <match ddos>
