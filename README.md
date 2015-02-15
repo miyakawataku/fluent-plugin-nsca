@@ -39,38 +39,38 @@ The plugin sends a service check to the NSCA server for each record.
 ### Plugin type
 
 The type of this plugin is `nsca`.
-So specify `type nsca` in `match` sections.
+Specify `type nsca` in the `match` section.
 
 ### Connection
 
-* `server` (default=localhost)
+* `server` (default is "localhost")
   * The IP address or the hostname of the host running the NSCA daemon.
-* `port` (default=5667)
+* `port` (default i 5667)
   * The port on which the NSCA daemon is running.
-* `password` (default=(empty string))
+* `password` (default is empty string)
   * The password for authentication and encryption.
 
 ### Payload
 
-A service check to the NSCA server and the Nagios server
+A service check for the NSCA server
 comprises the following four fields.
 
 * Host name
-  * Name of the monitored host.
+  * The name of the monitored host.
   * The corresponding property in the Nagios configuration is
     `host_name` property in a `host` definition.
 * Service description
-  * Name of the monitored service.
+  * The name of the monitored service.
   * The corresponding property in the Nagios configuration is
     `service_description` property in a `service` definition.
 * Return code
   * The severity of the service status.
   * 0 (OK), 1 (WARNING), 2 (CRITICAL) or 3 (UNKNOWN).
 * Plugin output
-  * An arbitrary text to describe the service status.
+  * A description of the service status.
 
-Checks are sent to the combination of (host name, service description)
-with the return code and the plugin output.
+The destination of checks
+are identified by the pair of the host name and the service description.
 
 #### Host name
 
@@ -141,16 +141,14 @@ The return code is determined as below.
 
 1. 3 or UNKNOWN (lowest priority)
 2. `return_code` option
-  * The static return code.
   * The permitted values are `0`, `1`, `2`, `3`,
     and `OK`, `WARNING`, `CRITICAL`, `UNKNOWN`.
-3. `return_code_field` option (highest priority)
-  * The name of the field which contains the return code.
-  * The permitted values of the field are numbers `0`, `1`, `2`, `3`
+3. The field specified by `return_code_field` option (highest priority)
+  * The values permitted for the field are integers `0`, `1`, `2`, `3`
     and strings `"0"`, `"1"`, `"2"`, `"3"`,
-    `"OK"`, `"WARNING"`, `"CRITICAL"`, `"UNKNOWN"`
-  * If the field contains a value not permittedj,
-    the plugin falls back to `return_code` if present, or to 3/UNKNOWN.
+    `"OK"`, `"WARNING"`, `"CRITICAL"`, `"UNKNOWN"`.
+  * If the field contains a value not permitted,
+    the plugin falls back to `return_code` if present, or to 3 (UNKNOWN).
 
 For example,
 let the configuration file contain the section below:
