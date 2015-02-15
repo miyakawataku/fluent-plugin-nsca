@@ -100,6 +100,8 @@ When the record `{"num" => 42}` is input to the tag `ddos`,
 the plugin sends a service check with the host name "fluent"
 (the host name of the fluentd server).
 
+Be aware that if the host name exceeds 64 bytes, it will be truncated.
+
 #### Service description
 
 The service description is determined as below.

@@ -43,19 +43,35 @@ module Fluent
     config_param :plugin_output_field, :string, :default => nil
 
 
+    private
     def initialize
       require 'send_nsca'
     end
 
+    MAX_HOST_NAME_BYTES = 64
+
+    public
     def configure(conf)
       super
       @host_name ||= Socket.gethostname
+      warn_if_host_name_exceeds_max(@host_name)
     end
 
+    private
+    def warn_if_host_name_exceeds_max(host_name)
+      if host_name.bytesize > MAX_HOST_NAME_BYTES
+        log.warn("Host name exceeds the max bytes; it will be truncated",
+                 :max_host_name_bytes => MAX_HOST_NAME_BYTES,
+                 :host_name => host_name)
+      end
+    end
+
+    public
     def format(tag, time, record)
       [tag, time, record].to_msgpack
     end
 
+    public
     def write(chunk)
       results = []
       chunk.msgpack_each { |(tag, time, record)|
@@ -78,7 +94,9 @@ module Fluent
     private
     def determine_host_name(record)
       if @host_name_field and record[@host_name_field]
-        return record[@host_name_field].to_s
+        host_name = record[@host_name_field].to_s
+        warn_if_host_name_exceeds_max(host_name)
+        return host_name
       else
         return @host_name
       end
@@ -102,7 +120,10 @@ module Fluent
         if return_code
           return return_code
         end
-        log.warn('Invalid return code', :return_code_field => @return_code_field, :value => record[@return_code_field])
+        log.warn('Invalid return code',
+                 :return_code_field => @return_code_field,
+                 :value => record[@return_code_field],
+                 :fall_back_to => @return_code)
       end
       return @return_code
     end
