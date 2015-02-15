@@ -74,12 +74,21 @@ The host name is determined as below.
 3. `host_name_field` option (highest priority)
   * The name of the field which contains the host name.
 
-`host_name_field` option has the highes priority.
-For example, the configuration contains the line `host_name_field host`
-and the record contains `host` field whose value is `app.example.org`,
-`app.example.org` is send as the host name.
-If the record does not have the field specified by `host_name_field` option,
-the plugin falls back to `host_name` option or the result of `hostname` command.
+For example,
+let the fluentd server have the host name "fluent",
+and the configuration file contain the below line:
+
+```apache
+host_name_field monitee
+```
+
+When the record `{"num" => 42, "monitee" => "web.example.org"}`
+is input with the setting above,
+the plugin sends a service check with the host name "web.example.org".
+
+When the record `{"num" => 42}` is input with the setting above,
+the plugin sends a service check with the host name "fluent"
+(the host name of the fluentd server).
 
 #### Service description
 
