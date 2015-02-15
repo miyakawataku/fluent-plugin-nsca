@@ -115,7 +115,7 @@ The service description is determined as below.
   * The name of the field which contains the service description.
 
 For example,
-the configuration file contain the section below:
+let the configuration file contain the section below:
 
 ```apache
 <match ddos>
@@ -140,16 +140,44 @@ the plugin sends a service check with the service description
 
 #### Return code
 
+The return code is determined as below.
+
 The return code can be specified by one of the following options.
 If none of them is specified,
 the plugin uses 3 (UNKNOWN) as the return code.
 
-* `return_code`
+1. 3 or UNKNOWN (lowes priority)
+2. `return_code` option
   * The static return code.
-* `return_code_field`
+  * The permitted values are `0`, `1`, `2`, `3`,
+    and `OK`, `WARNING`, `CRITICAL`, `UNKNOWN`.
+3. `return_code_field` option (highest priority)
   * The name of the field which contains the return code.
+  * The permitted values of the field are numbers `0`, `1`, `2`, `3`
+    and strings `"0"`, `"1"`, `"2"`, `"3"`,
+    `"OK"`, `"WARNING"`, `"CRITICAL"`, `"UNKNOWN"`
+  * If the field contains a value not permittedj,
+    the plugin falls back to `return_code` if present, or to 3/UNKNOWN.
 
-Numbers 0, 1, 2, 3, or strings '0', '1', '2', '3', 'OK', 'WARNING', 'CRITICAL' and 'UNKNOWN' are accepted.
+For example,
+let the configuration file contain the section below:
+
+```apache
+<match ddos>
+  type nsca
+  ...snip...
+  return_code_field retcode
+</match>
+```
+
+When the record
+`{"num" => 42, "retcode" => "WARNING"}` is input to the tag `ddos`,
+the plugin sends a service check with the return code `1`,
+which means WARNING.
+
+When the record
+`{"num" => 42}` is input to the tag `ddos`,
+the plugin sends a service check with the default return code `3`.
 
 #### Plugin output
 

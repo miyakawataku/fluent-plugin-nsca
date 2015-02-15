@@ -22,8 +22,24 @@ module Fluent
     config_param :service_description, :string, :default => nil
     config_param :service_description_field, :string, :default => nil
 
-    config_param :return_code, :string, :default => nil
+    # Return code options: default=3 (UNKNOWN)
+    config_param :return_code_field, :string, :default => nil
+    config_param(:return_code, :default => 3) { |return_code|
+      if not @@valid_return_codes.has_key?(return_code)
+          raise Fluent::ConfigError,
+            "invalid 'return_code': #{return_code}; 'return_code' must be" +
+            "0, 1, 2, 3, OK, WARNING, CRITICAL, or UNKNOWN"
+      end
+      @@valid_return_codes[return_code]
+    }
+    @@valid_return_codes = {
+      0 => 0, 1 => 1, 2 => 2, 3 => 3,
+      '0' => 0, '1' => 1, '2' => 2, '3' => 3,
+      'OK' => 0, 'WARNING' => 1, 'CRITICAL' => 2, 'UNKNOWN' => 3
+    }
+
     config_param :plugin_output, :string, :default => nil
+
 
     def initialize
       require 'send_nsca'
@@ -47,7 +63,7 @@ module Fluent
           :password => @password,
           :hostname => determine_host_name(record),
           :service => determine_service_description(tag, record),
-          :return_code => @return_code.to_i,
+          :return_code => determine_return_code(record),
           :status => @plugin_output
         })
         results.push(nsca_check.send_nsca)
@@ -75,6 +91,18 @@ module Fluent
       else
         return tag
       end
+    end
+
+    private
+    def determine_return_code(record)
+      if @return_code_field and record[@return_code_field]
+        return_code =  @@valid_return_codes[record[@return_code_field]]
+        if return_code
+          return return_code
+        end
+        log.warn('Invalid return code', :return_code_field => @return_code_field, :value => record[@return_code_field])
+      end
+      return @return_code
     end
   end
 end
