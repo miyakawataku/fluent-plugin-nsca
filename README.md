@@ -200,7 +200,30 @@ the plugin sends a service check with the plugin output '{"num":42}'.
 Be aware that if the plugin output exceeds 512 bytes,
 it will be truncated.
 
-## Installation (doesn't work yet!)
+### Buffering option
+
+The default value of `flush_interval` option is set to 1 second.
+It means that checks are sent for every 1 second.
+
+Except for `flush_interval`,
+the plugin uses default buffering options
+for buffered output plugins (defined in Fluent::BufferedOutput class),
+
+You can override the buffering options in the configuration.
+For example:
+
+```apache
+<match ddos>
+  type nsca
+  ...snip...
+  buffer_type file
+  buffer_path /var/lib/td-agent/buffer/ddos
+  flush_interval 0.1
+  try_flush_interval 0.1
+</match>
+```
+
+## Installation
 
 If you are using td-agent, execute the command below.
 

@@ -47,6 +47,8 @@ module Fluent
     config_param :plugin_output, :string, :default => nil
     config_param :plugin_output_field, :string, :default => nil
 
+    # Overrides a buffering option
+    config_param :flush_interval, :time, :default => 1
 
     private
     def initialize

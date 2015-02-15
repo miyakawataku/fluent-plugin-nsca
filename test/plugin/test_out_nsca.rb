@@ -57,6 +57,12 @@ class NscaOutputTest < Test::Unit::TestCase
     }
   end
 
+  # flush_interval is set to 1
+  def test_flush_interval
+    driver = create_driver('')
+    assert_equal 1, driver.instance.instance_eval { @flush_interval }
+  end
+
   # Format to MessagePack(tag, time, record)
   def test_format
     driver = create_driver('', 'ddos')
