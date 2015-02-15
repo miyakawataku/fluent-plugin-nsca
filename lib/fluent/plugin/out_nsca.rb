@@ -52,6 +52,7 @@ module Fluent
 
     private
     def initialize
+      super
       require 'send_nsca'
     end
 
