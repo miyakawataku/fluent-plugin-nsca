@@ -43,63 +43,63 @@ class NscaOutputTest < Test::Unit::TestCase
     assert_equal '', driver.instance.instance_eval{ @password }
   end
 
-  # Decide if host name is valid
-  def test_host_name_is_valid()
+  # Decide if host name exceeds the max bytes
+  def test_host_name_exceeds_max_bytes()
     max_bytes = Fluent::NscaOutput::MAX_HOST_NAME_BYTES
     driver = create_driver('')
 
     max_bytes_host_name = 'x' * max_bytes
-    assert_equal true, driver.instance.instance_eval{
-      host_name_valid?(max_bytes_host_name)
+    assert_equal false, driver.instance.instance_eval{
+      host_name_exceeds_max_bytes?(max_bytes_host_name)
     }
 
     invalid_host_name = 'x' * (max_bytes + 1)
-    assert_equal false, driver.instance.instance_eval{
-      host_name_valid?(invalid_host_name)
+    assert_equal true, driver.instance.instance_eval{
+      host_name_exceeds_max_bytes?(invalid_host_name)
     }
 
     assert_equal false, driver.instance.instance_eval{
-      host_name_valid?(nil)
+      host_name_exceeds_max_bytes?(nil)
     }
   end
 
-  # Decide if service description is valid
-  def test_service_description_is_valid()
+  # Decide if service description exceeds the max bytes
+  def test_service_description_exceeds_max_bytes()
     max_bytes = Fluent::NscaOutput::MAX_SERVICE_DESCRIPTION_BYTES
     driver = create_driver('')
 
     max_bytes_service = 'x' * max_bytes
-    assert_equal true, driver.instance.instance_eval{
-      service_description_valid?(max_bytes_service)
+    assert_equal false, driver.instance.instance_eval{
+      service_description_exceeds_max_bytes?(max_bytes_service)
     }
 
     invalid_service = 'x' * (max_bytes + 1)
-    assert_equal false, driver.instance.instance_eval{
-      service_description_valid?(invalid_service)
+    assert_equal true, driver.instance.instance_eval{
+      service_description_exceeds_max_bytes?(invalid_service)
     }
 
     assert_equal false, driver.instance.instance_eval{
-      service_description_valid?(nil)
+      service_description_exceeds_max_bytes?(nil)
     }
   end
 
-  # Decide if plugin output is valid
-  def test_plugin_output_is_valid()
+  # Decide if plugin output exceeds the max bytes
+  def test_plugin_output_exceeds_max_bytes()
     max_bytes = Fluent::NscaOutput::MAX_PLUGIN_OUTPUT_BYTES
     driver = create_driver('')
 
     max_bytes_plugin_output = 'x' * max_bytes
-    assert_equal true, driver.instance.instance_eval{
-      plugin_output_valid?(max_bytes_plugin_output)
+    assert_equal false, driver.instance.instance_eval{
+      plugin_output_exceeds_max_bytes?(max_bytes_plugin_output)
     }
 
     invalid_plugin_output = 'x' * (max_bytes + 1)
-    assert_equal false, driver.instance.instance_eval{
-      plugin_output_valid?(invalid_plugin_output)
+    assert_equal true, driver.instance.instance_eval{
+      plugin_output_exceeds_max_bytes?(invalid_plugin_output)
     }
 
     assert_equal false, driver.instance.instance_eval{
-      plugin_output_valid?(nil)
+      plugin_output_exceeds_max_bytes?(nil)
     }
   end
 
