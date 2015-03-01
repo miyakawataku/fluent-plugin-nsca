@@ -43,6 +43,102 @@ class NscaOutputTest < Test::Unit::TestCase
     assert_equal '', driver.instance.instance_eval{ @password }
   end
 
+  # Reject host_name option exceeding the max bytes
+  def test_reject_host_name_option_exceeding_max_bytes
+    max_bytes = Fluent::NscaOutput::MAX_HOST_NAME_BYTES
+    config = %[
+      #{CONFIG}
+      host_name #{'x' * (max_bytes + 1)}
+    ]
+    assert_raise(Fluent::ConfigError) {
+      create_driver(config)
+    }
+  end
+
+  # Decide if host name exceeds the max bytes
+  def test_host_name_exceeds_max_bytes()
+    max_bytes = Fluent::NscaOutput::MAX_HOST_NAME_BYTES
+    driver = create_driver('')
+
+    max_bytes_host_name = 'x' * max_bytes
+    assert_equal false, driver.instance.instance_eval{
+      host_name_exceeds_max_bytes?(max_bytes_host_name)
+    }
+
+    invalid_host_name = 'x' * (max_bytes + 1)
+    assert_equal true, driver.instance.instance_eval{
+      host_name_exceeds_max_bytes?(invalid_host_name)
+    }
+
+    assert_equal false, driver.instance.instance_eval{
+      host_name_exceeds_max_bytes?(nil)
+    }
+  end
+
+  # Reject service_description option exceeding the max bytes
+  def test_reject_service_description_option_exceeding_max_bytes
+    max_bytes = Fluent::NscaOutput::MAX_SERVICE_DESCRIPTION_BYTES
+    config = %[
+      #{CONFIG}
+      service_description #{'x' * (max_bytes + 1)}
+    ]
+    assert_raise(Fluent::ConfigError) {
+      create_driver(config)
+    }
+  end
+
+  # Decide if service description exceeds the max bytes
+  def test_service_description_exceeds_max_bytes()
+    max_bytes = Fluent::NscaOutput::MAX_SERVICE_DESCRIPTION_BYTES
+    driver = create_driver('')
+
+    max_bytes_service = 'x' * max_bytes
+    assert_equal false, driver.instance.instance_eval{
+      service_description_exceeds_max_bytes?(max_bytes_service)
+    }
+
+    invalid_service = 'x' * (max_bytes + 1)
+    assert_equal true, driver.instance.instance_eval{
+      service_description_exceeds_max_bytes?(invalid_service)
+    }
+
+    assert_equal false, driver.instance.instance_eval{
+      service_description_exceeds_max_bytes?(nil)
+    }
+  end
+
+  # Reject plugin_output option exceeding the max bytes
+  def test_reject_plugin_output_exceeding_max_bytes
+    max_bytes = Fluent::NscaOutput::MAX_PLUGIN_OUTPUT_BYTES
+    config = %[
+      #{CONFIG}
+      plugin_output #{'x' * (max_bytes + 1)}
+    ]
+    assert_raise(Fluent::ConfigError) {
+      create_driver(config)
+    }
+  end
+
+  # Decide if plugin output exceeds the max bytes
+  def test_plugin_output_exceeds_max_bytes()
+    max_bytes = Fluent::NscaOutput::MAX_PLUGIN_OUTPUT_BYTES
+    driver = create_driver('')
+
+    max_bytes_plugin_output = 'x' * max_bytes
+    assert_equal false, driver.instance.instance_eval{
+      plugin_output_exceeds_max_bytes?(max_bytes_plugin_output)
+    }
+
+    invalid_plugin_output = 'x' * (max_bytes + 1)
+    assert_equal true, driver.instance.instance_eval{
+      plugin_output_exceeds_max_bytes?(invalid_plugin_output)
+    }
+
+    assert_equal false, driver.instance.instance_eval{
+      plugin_output_exceeds_max_bytes?(nil)
+    }
+  end
+
   # Rejects invalid return codes
   def test_reject_invalid_return_codes
     config = %[

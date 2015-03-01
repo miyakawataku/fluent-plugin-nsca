@@ -60,24 +60,57 @@ module Fluent
     def configure(conf)
       super
       @host_name ||= Socket.gethostname
-      warn_if_host_name_exceeds_max_bytes(@host_name)
-      warn_if_service_description_exceeds_max_bytes(@service_description)
-      warn_if_plugin_output_exceeds_max_bytes(@plugin_output)
+      reject_host_name_option_exceeding_max_bytes
+      reject_service_description_option_exceeding_max_bytes
+      reject_plugin_output_option_exceeding_max_bytes
+    end
+
+    # Reject host_name option exceeding the max bytes
+    private
+    def reject_host_name_option_exceeding_max_bytes
+      if host_name_exceeds_max_bytes?(@host_name)
+        raise ConfigError,
+          "host_name must not exceed #{MAX_HOST_NAME_BYTES} bytes"
+      end
+    end
+
+    # Reject service_description option exceeding the max bytes
+    private
+    def reject_service_description_option_exceeding_max_bytes
+      if service_description_exceeds_max_bytes?(@service_description)
+        raise ConfigError,
+          "service_description must not exceed" +
+          " #{MAX_SERVICE_DESCRIPTION_BYTES} bytes"
+      end
+    end
+
+    # Reject plugin_output option exceeding the max bytes
+    private
+    def reject_plugin_output_option_exceeding_max_bytes
+      if plugin_output_exceeds_max_bytes?(@plugin_output)
+        raise ConfigError,
+          "plugin_output must not exceed #{MAX_PLUGIN_OUTPUT_BYTES} bytes"
+      end
     end
 
     private
     def warn_if_host_name_exceeds_max_bytes(host_name)
-      if host_name.bytesize > MAX_HOST_NAME_BYTES
+      if host_name_exceeds_max_bytes?(host_name)
         log.warn("Host name exceeds the max bytes; it will be truncated",
                  :max_host_name_bytes => MAX_HOST_NAME_BYTES,
                  :host_name => host_name)
       end
     end
 
+    # Returns true if host_name exceeds the max bytes
+    private
+    def host_name_exceeds_max_bytes?(host_name)
+      return !! host_name && host_name.bytesize > MAX_HOST_NAME_BYTES
+    end
+
     private
     def warn_if_service_description_exceeds_max_bytes(service_description)
-      if service_description and
-        service_description.bytesize > MAX_SERVICE_DESCRIPTION_BYTES
+      if service_description_exceeds_max_bytes?(service_description)
         log.warn(
           "Service description exceeds the max bytes; it will be truncated.",
           :max_service_description_bytes => MAX_SERVICE_DESCRIPTION_BYTES,
@@ -85,13 +118,27 @@ module Fluent
       end
     end
 
+    # Returns true if service_description exceeds the max bytes
+    private
+    def service_description_exceeds_max_bytes?(service_description)
+      return !! service_description &&
+        service_description.bytesize > MAX_SERVICE_DESCRIPTION_BYTES
+    end
+
     private
     def warn_if_plugin_output_exceeds_max_bytes(plugin_output)
-      if plugin_output and plugin_output.bytesize > MAX_PLUGIN_OUTPUT_BYTES
+      if plugin_output_exceeds_max_bytes?(plugin_output)
         log.warn("Plugin output exceeds the max bytes; it will be truncated.",
                 :max_plugin_output_bytes => MAX_PLUGIN_OUTPUT_BYTES,
                 :plugin_output => plugin_output)
       end
+    end
+
+    # Returns true if plugin_output exceeds the max bytes
+    private
+    def plugin_output_exceeds_max_bytes?(plugin_output)
+      return !! plugin_output &&
+        plugin_output.bytesize > MAX_PLUGIN_OUTPUT_BYTES
     end
 
     public
