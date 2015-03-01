@@ -245,7 +245,8 @@ You have
 * "monitor" server (192.168.42.210) which runs Nagios and NSCA.
 
 You want to be notified when Apache responds too many server errors,
-for example 100 errors per minute.
+for example 50 errors per minute as WARNING,
+and 100 errors per minute as CRITICAL.
 
 ### Nagios configuration on "monitor" server
 
@@ -283,8 +284,11 @@ define command {
 
 ### Fluentd configuration on "web" server
 
-This setting utilizes `fluent-plugin-datacounter`,
-`fluent-plugin-record-reformer`, and of course `fluent-plugin-nsca`.
+This setting utilizes [fluent-plugin-datacounter](
+https://github.com/tagomoris/fluent-plugin-datacounter),
+[fluent-plugin-record-reformer](
+https://github.com/sonots/fluent-plugin-record-reformer),
+and of course `fluent-plugin-nsca`.
 So, first of all, install those gems.
 
 Next, add these lines to the Fluentd configuration file.
@@ -307,7 +311,7 @@ Next, add these lines to the Fluentd configuration file.
   tag count.access
   unit minute
   count_key status
-  pattern1 server_errors ^5\d\d$
+  pattern1 errors ^5\d\d$
 </match>
 
 # Calculate the serverity
@@ -316,7 +320,7 @@ Next, add these lines to the Fluentd configuration file.
   tag server_errors
   enable_ruby true
   <record>
-    severity ${case server_errors when 0...50; 'OK' when 50...100; 'WARNING'; else 'CRITICAL' end}
+    severity ${errors < 50 ? 'OK' : errors < 100 ? 'WARNING' : 'CRITICAL'}
   </record>
 </match>
 
@@ -333,7 +337,8 @@ Next, add these lines to the Fluentd configuration file.
 </match>
 ```
 
-You can use `record_transformer` filter instead of fluent-plugin-record-reformer
+You can use `record_transformer` filter
+instead of `fluent-plugin-record-reformer`
 on Fluentd 0.12.0 and above.
 
 ## Installation
