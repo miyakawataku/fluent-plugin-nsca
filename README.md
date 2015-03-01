@@ -245,8 +245,8 @@ You have
 * "monitor" server (192.168.42.210) which runs Nagios and NSCA.
 
 You want to be notified when Apache responds too many server errors,
-for example 50 errors per minute as WARNING,
-and 100 errors per minute as CRITICAL.
+for example 5 errors per minute as WARNING,
+and 50 errors per minute as CRITICAL.
 
 ### Nagios configuration on "monitor" server
 
@@ -310,8 +310,9 @@ Next, add these lines to the Fluentd configuration file.
   type datacounter
   tag count.access
   unit minute
-  count_key status
-  pattern1 errors ^5\d\d$
+  aggregate all
+  count_key code
+  pattern1 error ^5\d\d$
 </match>
 
 # Calculate the serverity
@@ -320,7 +321,7 @@ Next, add these lines to the Fluentd configuration file.
   tag server_errors
   enable_ruby true
   <record>
-    severity ${errors < 50 ? 'OK' : errors < 100 ? 'WARNING' : 'CRITICAL'}
+    level ${error_count < 5 ? 'OK' : error_count < 50 ? 'WARNING' : 'CRITICAL'}
   </record>
 </match>
 
@@ -333,7 +334,7 @@ Next, add these lines to the Fluentd configuration file.
 
   host_name web
   service_description server_errors
-  return_code_field severity
+  return_code_field level
 </match>
 ```
 
