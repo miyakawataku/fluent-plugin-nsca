@@ -235,6 +235,107 @@ For example:
 </match>
 ```
 
+## Use case: "too many server errors" alert
+
+### Situation
+
+You have
+
+* "web" server (192.168.42.123) which runs Apache HTTP Server and Fluentd, and
+* "monitor" server (192.168.42.210) which runs Nagios and NSCA.
+
+You want to be notified when Apache responds too many server errors,
+for example 100 errors per minute.
+
+### Nagios configuration on "monitor" server
+
+Create web.cfg file shown as below,
+under the Nagios configuration direcotry.
+
+```
+# File: web.cfg
+
+# "web" server definition
+define host {
+  use generic-host
+  host_name web
+  alias web
+  address 192.168.42.123
+}
+
+# Server errors service definition
+define service {
+  use generic-service
+  name server_errors
+  active_checks_enabled 0
+  passive_checks_enabled 1
+  flap_detection_enabled 0
+  max_check_attempts 1
+  check_command check_dummy!0
+}
+
+# Delete this section if check_dummy command is defined elsewhere
+define command {
+  command_name check_dummy
+  command_line $USER1$/check_dummy $ARG1$
+}
+```
+
+### Fluentd configuration on "web" server
+
+This setting utilizes `fluent-plugin-datacounter`,
+`fluent-plugin-record-reformer`, and of course `fluent-plugin-nsca`.
+So, first of all, install those gems.
+
+Next, add these lines to the Fluentd configuration file.
+
+```apache
+# Parse Apache access log
+<source>
+  type tail
+  tag access
+  format apache2
+
+  # The paths vary by setup
+  path /var/log/httpd/access_log
+  pos_file /var/log/fluentd/httpd-access_log.pos
+</source>
+
+# Count 5xx errors per minute
+<match access>
+  type datacounter
+  tag count.access
+  unit minute
+  count_key status
+  pattern1 server_errors ^5\d\d$
+</match>
+
+# Calculate the serverity
+<match count.access>
+  type record_reformer
+  tag server_errors
+  enable_ruby true
+  <record>
+    severity ${case server_errors when 0...50; 'OK' when 50...100; 'WARNING'; else 'CRITICAL' end}
+  </record>
+</match>
+
+# Send checks to NSCA
+<match server_errors>
+  type nsca
+  server 192.168.42.210
+  port 5667
+  # Empty password!
+
+  host_name web
+  service_description server_errors
+  return_code_field severity
+</match>
+```
+
+You can use `record_transformer` filter instead of fluent-plugin-record-reformer
+on Fluentd 0.12.0 and above.
+
 ## Installation
 
 1. Install fluent-plugin-nsca gem from rubygems.org.
