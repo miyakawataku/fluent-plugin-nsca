@@ -27,8 +27,8 @@ The plugin sends a service check to the NSCA server for each record.
   ## The service is "ddos_detection"
   service_description ddos_detection
 
-  ## The return code is read from the field "severity"
-  return_code_field severity
+  ## The return code is read from the field "level"
+  return_code_field level
 
   ## The plugin output is not specified;
   ## hence the plugin sends the JSON notation of the record.
@@ -66,7 +66,7 @@ comprises the following four fields.
     `service_description` property in a `service` definition.
   * Limited to the maximum 128 bytes.
 * Return code
-  * The severity of the service status.
+  * The severity level of the service status.
   * 0 (OK), 1 (WARNING), 2 (CRITICAL) or 3 (UNKNOWN).
 * Plugin output
   * A description of the service status.
@@ -166,12 +166,12 @@ assume that the configuration file contains the section below:
 <match ddos>
   type nsca
   ...snip...
-  return_code_field retcode
+  return_code_field level
 </match>
 ```
 
 When the record
-`{"num" => 42, "retcode" => "WARNING"}` is input to the tag `ddos`,
+`{"num" => 42, "level" => "WARNING"}` is input to the tag `ddos`,
 the plugin sends a service check with the return code `1`,
 which means WARNING.
 
@@ -315,7 +315,7 @@ Next, add these lines to the Fluentd configuration file.
   pattern1 error ^5\d\d$
 </match>
 
-# Calculate the serverity
+# Calculate the severity level
 <match count.access>
   type record_reformer
   tag server_errors
