@@ -8,7 +8,7 @@ The plugin sends a service check to the NSCA server for each record.
 
 ## Configuration
 
-### Examples
+### Example configuration
 
 ```apache
 <match ddos>
@@ -41,7 +41,7 @@ The plugin sends a service check to the NSCA server for each record.
 The type of this plugin is `nsca`.
 Specify `type nsca` in the `match` section.
 
-### Connection
+### Connection setting
 
 * `server` (default is "localhost")
   * The IP address or the hostname of the host running the NSCA daemon.
@@ -50,7 +50,7 @@ Specify `type nsca` in the `match` section.
 * `password` (default is an empty string)
   * The password for authentication and encryption.
 
-### Payload
+### Check payload
 
 A service check for the NSCA server
 comprises the following four fields.
@@ -82,9 +82,10 @@ The host name is determined as below.
 1. The field specified by `host_name_field` option,
    if present (highest priority)
   * If the value exceeds the maximum 64 bytes, it will be truncated.
-2. Or `host_name` option, if present
+2. or `host_name` option, if present
   * If the value exceeds the maximum 64 bytes, it causes a config error.
-3. Or the host name of the fluentd server (lowest priority)
+3. or the host name of the fluentd server (lowest priority)
+  * If the value exceeds the maximum 64 bytes, it causes a config error.
 
 For example,
 assume that the fluentd server has the host name "fluent",
@@ -113,9 +114,9 @@ The service description is determined as below.
 1. The field specified by `service_description_field` option,
    if present (highest priority)
   * If the value exceeds the maximum 128 bytes, it will be truncated.
-2. Or `service_description` option, if present
+2. or `service_description` option, if present
   * If the value exceeds the maximum 128 bytes, it causes a config error.
-3. Or the tag name (lowest priority)
+3. or the tag name (lowest priority)
   * If the value exceeds the maximum 128 bytes, it will be truncated.
 
 For example,
@@ -152,7 +153,7 @@ The return code is determined as below.
   * If the field contains a value not permitted,
     the plugin falls back to `return_code` option if present,
     or to `3` (UNKNOWN).
-2. Or `return_code` option, if present
+2. or `return_code` option, if present
   * The permitted values are `0`, `1`, `2`, `3`,
     and `OK`, `WARNING`, `CRITICAL`, `UNKNOWN`.
   * If the value is invalid, it causes a config error.
@@ -176,7 +177,8 @@ which means WARNING.
 
 When the record
 `{"num" => 42}` is input to the tag `ddos`,
-the plugin sends a service check with the default return code `3`.
+the plugin sends a service check with the default return code `3`,
+which means UNKNOWN.
 
 #### Plugin output
 
@@ -185,9 +187,9 @@ The plugin output is determined as below.
 1. The field specified by `plugin_output_field` option,
    if present (highest priority)
   * If the value exceeds the maximum 512 bytes, it will be truncated.
-2. `plugin_output` option
+2. or `plugin_output` option
   * If the value exceeds the maximum 512 bytes, it causes a config error.
-3. JSON notation of the record (lowest priority)
+3. or JSON notation of the record (lowest priority)
   * If the value exceeds the maximum 512 bytes, it will be truncated.
 
 For example,
