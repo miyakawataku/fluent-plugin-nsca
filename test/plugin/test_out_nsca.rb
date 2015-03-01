@@ -10,7 +10,8 @@ class NscaOutputTest < Test::Unit::TestCase
     stub.proxy(SendNsca::NscaConnection).new { |obj|
       stub(obj).send_nsca {
         obj.instance_eval {
-          [@nscahost, @port, @password, @hostname, @service, @return_code, @status]
+          [@nscahost, @port, @password,
+           @hostname, @service, @return_code, @status]
         }
       }
     }
@@ -23,7 +24,8 @@ class NscaOutputTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf = CONFIG, tag='test')
-    Fluent::Test::BufferedOutputTestDriver.new(Fluent::NscaOutput, tag).configure(conf)
+    driver = Fluent::Test::BufferedOutputTestDriver.new(Fluent::NscaOutput, tag)
+    driver.configure(conf)
   end
 
   # Connection settings are read
@@ -182,7 +184,9 @@ class NscaOutputTest < Test::Unit::TestCase
     time = Time.parse('2015-01-03 12:34:56 UTC').to_i
     driver.emit({"name" => "Stephen"}, time)
     output = driver.run
-    assert_equal [['monitor.example.com', 4242, 'aoxomoxoa', 'web.example.org', 'ddos_monitor', 2, 'possible attacks']], output
+    expected = ['monitor.example.com', 4242, 'aoxomoxoa',
+                'web.example.org', 'ddos_monitor', 2, 'possible attacks']
+    assert_equal [expected], output
   end
 
   # Sends a service check with host_name and host_name_field
@@ -201,13 +205,11 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "host" => "app.example.org"}, time)
     driver.emit({"name" => "Aggi"}, time)
     output = driver.run
-    expected_first = [
-      'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
-    ]
-    expected_second = [
-      'monitor.example.com', 4242, 'aoxomoxoa', 'fallback.example.org', 'ddos_monitor', 2, 'possible attacks'
-    ]
-    assert_equal [expected_first, expected_second], output
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'app.example.org', 'ddos_monitor', 2, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'fallback.example.org', 'ddos_monitor', 2, 'possible attacks']
+    assert_equal [expected1, expected2], output
   end
 
   # Sends a service check with host_name_field
@@ -225,15 +227,12 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "host" => "app.example.org"}, time)
     driver.emit({"name" => "Aggi"}, time)
     output = driver.run
-    expected_first = [
-      'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
-    ]
-
     require 'socket'
-    expected_second = [
-      'monitor.example.com', 4242, 'aoxomoxoa', Socket.gethostname, 'ddos_monitor', 2, 'possible attacks'
-    ]
-    assert_equal [expected_first, expected_second], output
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'app.example.org', 'ddos_monitor', 2, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 Socket.gethostname, 'ddos_monitor', 2, 'possible attacks']
+    assert_equal [expected1, expected2], output
   end
 
   # Sends a service check with service_description and service_description_field
@@ -252,15 +251,11 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "service" => "possible_ddos"})
     driver.emit({"name" => "Aggi"})
     output = driver.run
-    expected_first = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'possible_ddos', 2, 'possible attacks'
-    ]
-    expected_second = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_detection', 2, 'possible attacks'
-    ]
-    assert_equal [expected_first, expected_second], output
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'possible_ddos', 2, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_detection', 2, 'possible attacks']
+    assert_equal [expected1, expected2], output
   end
 
   # Sends a service check with service_description_field
@@ -278,15 +273,11 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "service" => "possible_ddos"})
     driver.emit({"name" => "Aggi"})
     output = driver.run
-    expected_first = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'possible_ddos', 2, 'possible attacks'
-    ]
-    expected_second = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos', 2, 'possible attacks'
-    ]
-    assert_equal [expected_first, expected_second], output
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'possible_ddos', 2, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos', 2, 'possible attacks']
+    assert_equal [expected1, expected2], output
   end
 
   # Sends a service check with return_code and return_code_field
@@ -308,26 +299,16 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Brian", "retcode" => "invalid-value"})
     driver.emit({"name" => "Martin"})
     output = driver.run
-    expected1 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 3, 'possible attacks'
-    ]
-    expected2 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, 'possible attacks'
-    ]
-    expected3 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 1, 'possible attacks'
-    ]
-    expected4 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 0, 'possible attacks'
-    ]
-    expected5 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 0, 'possible attacks'
-    ]
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 3, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, 'possible attacks']
+    expected3 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 1, 'possible attacks']
+    expected4 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 0, 'possible attacks']
+    expected5 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 0, 'possible attacks']
     assert_equal [expected1, expected2, expected3, expected4, expected5], output
   end
 
@@ -349,26 +330,16 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Brian", "retcode" => "invalid-value"})
     driver.emit({"name" => "Martin"})
     output = driver.run
-    expected1 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 0, 'possible attacks'
-    ]
-    expected2 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 1, 'possible attacks'
-    ]
-    expected3 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, 'possible attacks'
-    ]
-    expected4 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 3, 'possible attacks'
-    ]
-    expected5 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 3, 'possible attacks'
-    ]
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 0, 'possible attacks']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 1, 'possible attacks']
+    expected3 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, 'possible attacks']
+    expected4 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 3, 'possible attacks']
+    expected5 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 3, 'possible attacks']
     assert_equal [expected1, expected2, expected3, expected4, expected5], output
   end
 
@@ -388,14 +359,10 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "status" => "Possible DDOS detected"})
     driver.emit({"name" => "Aggi"})
     output = driver.run
-    expected1 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, 'Possible DDOS detected'
-    ]
-    expected2 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, 'DDOS detected'
-    ]
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, 'Possible DDOS detected']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, 'DDOS detected']
     assert_equal [expected1, expected2], output
   end
 
@@ -414,14 +381,10 @@ class NscaOutputTest < Test::Unit::TestCase
     driver.emit({"name" => "Stephen", "status" => "Possible DDOS detected"})
     driver.emit({"name" => "Aggi"})
     output = driver.run
-    expected1 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, 'Possible DDOS detected'
-    ]
-    expected2 = [
-      'monitor.example.com', 4242, 'aoxomoxoa',
-      'web.example.org', 'ddos_monitor', 2, '{"name":"Aggi"}'
-    ]
+    expected1 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, 'Possible DDOS detected']
+    expected2 = ['monitor.example.com', 4242, 'aoxomoxoa',
+                 'web.example.org', 'ddos_monitor', 2, '{"name":"Aggi"}']
     assert_equal [expected1, expected2], output
   end
 end
