@@ -2,7 +2,6 @@
 # vim: et sw=2 sts=2
 
 require 'helper'
-require 'socket'
 require 'send_nsca'
 
 class NscaOutputTest < Test::Unit::TestCase
@@ -229,6 +228,8 @@ class NscaOutputTest < Test::Unit::TestCase
     expected_first = [
       'monitor.example.com', 4242, 'aoxomoxoa', 'app.example.org', 'ddos_monitor', 2, 'possible attacks'
     ]
+
+    require 'socket'
     expected_second = [
       'monitor.example.com', 4242, 'aoxomoxoa', Socket.gethostname, 'ddos_monitor', 2, 'possible attacks'
     ]

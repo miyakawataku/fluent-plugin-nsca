@@ -96,6 +96,7 @@ module Fluent
     private
     def initialize
       super
+      require 'socket'
       require 'send_nsca'
     end
 
