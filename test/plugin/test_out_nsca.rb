@@ -4,9 +4,16 @@
 require 'helper'
 require 'send_nsca'
 
+# Test class for Fluent::NscaOutput
 class NscaOutputTest < Test::Unit::TestCase
+
+  # Sets up the test env and the stub
   def setup
     Fluent::Test.setup
+
+    # Stub NscaConnection
+    # whose send_nsca method returns the connection info and the check payload
+    # instead of sending the service check.
     stub.proxy(SendNsca::NscaConnection).new { |obj|
       stub(obj).send_nsca {
         obj.instance_eval {
@@ -17,12 +24,14 @@ class NscaOutputTest < Test::Unit::TestCase
     }
   end
 
+  # Common settings
   CONFIG = %[
     server monitor.example.com
     port 4242
     password aoxomoxoa
   ]
 
+  # Returns a driver of the plugin
   def create_driver(conf = CONFIG, tag='test')
     driver = Fluent::Test::BufferedOutputTestDriver.new(Fluent::NscaOutput, tag)
     driver.configure(conf)
