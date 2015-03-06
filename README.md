@@ -53,7 +53,7 @@ Specify `type nsca` in the `match` section.
 ### Check payload
 
 A service check for the NSCA server
-comprises the following four fields.
+comprises the following fields.
 
 * Host name
   * The name of the monitored host.
@@ -71,9 +71,6 @@ comprises the following four fields.
 * Plugin output
   * A description of the service status.
   * Limited to the maximum 512 bytes.
-
-The destination of checks
-are identified by the pair of the host name and the service description.
 
 #### Host name
 
@@ -229,7 +226,7 @@ For example:
   type nsca
   ...snip...
   buffer_type file
-  buffer_path /var/lib/td-agent/buffer/ddos
+  buffer_path /var/lib/fluentd/buffer/ddos
   flush_interval 0.1
   try_flush_interval 0.1
 </match>
@@ -289,7 +286,7 @@ https://github.com/tagomoris/fluent-plugin-datacounter),
 [fluent-plugin-record-reformer](
 https://github.com/sonots/fluent-plugin-record-reformer),
 and of course `fluent-plugin-nsca`.
-So, first of all, install those gems.
+So, first of all, install the gems of those plugins.
 
 Next, add these lines to the Fluentd configuration file.
 
@@ -302,7 +299,7 @@ Next, add these lines to the Fluentd configuration file.
 
   # The paths vary by setup
   path /var/log/httpd/access_log
-  pos_file /var/log/fluentd/httpd-access_log.pos
+  pos_file /var/lib/fluentd/pos/httpd-access_log.pos
 </source>
 
 # Count 5xx errors per minute
@@ -330,7 +327,7 @@ Next, add these lines to the Fluentd configuration file.
   type nsca
   server 192.168.42.210
   port 5667
-  # Empty password!
+  password peng!
 
   host_name web
   service_description server_errors
@@ -342,22 +339,21 @@ You can use `record_transformer` filter
 instead of `fluent-plugin-record-reformer`
 on Fluentd 0.12.0 and above.
 
+If you are concerned with scalability,
+[fluent-plugin-norikra](https://github.com/norikra/fluent-plugin-norikra)
+may be a better option than datacounter and record\_reformer.
+
 ## Installation
 
-1. Install fluent-plugin-nsca gem from rubygems.org.
-2. Add `match` sections to your fluentd configuration file.
+Install `fluent-plugin-nsca` gem.
+
+You don't have to install `send_nsca` command,
+because this plugin uses a pure ruby NSCA client library.
 
 ## Contributing
 
-Create an [issue](https://github.com/miyakawataku/fluent-plugin-nsca/issues).
+Submit an [issue](https://github.com/miyakawataku/fluent-plugin-nsca/issues)
+or a [pull request](https://github.com/miyakawataku/fluent-plugin-nsca/pulls).
 
-Or ask questions on Twitter to
-[@miyakawa\_taku](https://twitter.com/miyakawa_taku).
-
-Or submit a pull request as follows:
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+Feedback to [@miyakawa\_taku on Twitter](https://twitter.com/miyakawa_taku) 
+is also welcome.
