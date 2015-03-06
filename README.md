@@ -352,15 +352,8 @@ because this plugin uses a pure ruby NSCA client library.
 
 ## Contributing
 
-Create an [issue](https://github.com/miyakawataku/fluent-plugin-nsca/issues).
+Submit an [issue](https://github.com/miyakawataku/fluent-plugin-nsca/issues)
+or a [pull request](https://github.com/miyakawataku/fluent-plugin-nsca/pulls).
 
-Or ask questions on Twitter to
-[@miyakawa\_taku](https://twitter.com/miyakawa_taku).
-
-Or submit a pull request as follows:
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+Feedback to [@miyakawa\_taku on Twitter](https://twitter.com/miyakawa_taku) 
+is also welcome.
