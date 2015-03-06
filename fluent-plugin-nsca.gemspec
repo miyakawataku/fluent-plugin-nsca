@@ -5,11 +5,11 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-nsca"
-  spec.version       = '0.0.4'
+  spec.version       = '1.0.0'
   spec.authors       = ["MIYAKAWA Taku"]
   spec.email         = ["miyakawa.taku@gmail.com"]
   spec.description   = 'Fluentd output plugin to send service checks' +
-	  ' to an NSCA / Nagios monitoring server'
+	               ' to an NSCA / Nagios monitoring server'
   spec.summary       = spec.description
   spec.homepage      = "https://github.com/miyakawataku/fluent-plugin-nsca"
   spec.license       = "Apache License, v2.0"
